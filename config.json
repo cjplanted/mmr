@@ -1,0 +1,31 @@
+{
+  "version": "1.0",
+  "enabled": true,
+  "default_engine": "claude",
+  "engines": {
+    "claude": {
+      "cli": "claude",
+      "description": "Claude Code - file editing, Task orchestration, code execution"
+    },
+    "gemini": {
+      "cli": "gemini",
+      "flags": ["-y"],
+      "model": "gemini-3-preview-pro",
+      "description": "Gemini CLI - 1M+ context, web search, research"
+    }
+  },
+  "routing_rules": {
+    "by_agent_type": {
+      "gsd-phase-researcher": "gemini",
+      "gsd-project-researcher": "gemini",
+      "gsd-research-synthesizer": "gemini",
+      "gsd-planner": "claude",
+      "gsd-executor": "claude",
+      "gsd-verifier": "claude",
+      "gsd-debugger": "claude",
+      "gsd-codebase-mapper": "claude",
+      "gsd-plan-checker": "gemini",
+      "gsd-roadmapper": "claude"
+    }
+  }
+}
