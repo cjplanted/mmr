@@ -3,8 +3,9 @@
  * MMR (Multi-Model Router) - Routes GSD agent types to CLI engines.
  *
  * Usage:
- *   node router.js resolve <agent-type> [workflow]   - Returns engine name
- *   node router.js status                            - Prints routing table
+ *   node router.js resolve <agent-type>   - Returns engine name
+ *   node router.js status                 - Prints routing table
+ *   node router.js --help                 - Show usage
  *
  * Resolution priority:
  *   1. Per-project override (.planning/config.json -> mmr.agent_overrides)
@@ -40,7 +41,20 @@ function loadProjectConfig() {
   return loadJSON(PROJECT_CONFIG);
 }
 
-function resolve(agentType, workflow) {
+function knownEngines(globalConfig) {
+  return new Set(Object.keys(globalConfig.engines || {}));
+}
+
+function validateEngine(engine, globalConfig) {
+  const known = knownEngines(globalConfig);
+  if (!known.has(engine)) {
+    console.error(`MMR: Unknown engine "${engine}" (known: ${[...known].join(', ')})`);
+    return false;
+  }
+  return true;
+}
+
+function resolve(agentType) {
   const global = loadGlobalConfig();
 
   // MMR disabled -> always claude
@@ -49,28 +63,35 @@ function resolve(agentType, workflow) {
     return;
   }
 
+  const fallback = global.default_engine || 'claude';
+
   // Priority 1: Per-project agent override
   const project = loadProjectConfig();
   if (project?.mmr?.agent_overrides?.[agentType]) {
-    console.log(project.mmr.agent_overrides[agentType]);
+    const engine = project.mmr.agent_overrides[agentType];
+    if (validateEngine(engine, global)) { console.log(engine); return; }
+    console.log(fallback);
     return;
   }
 
   // Priority 2: Per-project default engine
   if (project?.mmr?.override_engine) {
-    console.log(project.mmr.override_engine);
+    const engine = project.mmr.override_engine;
+    if (validateEngine(engine, global)) { console.log(engine); return; }
+    console.log(fallback);
     return;
   }
 
   // Priority 3: Global routing rules
   const engine = global.routing_rules?.by_agent_type?.[agentType];
   if (engine) {
-    console.log(engine);
+    if (validateEngine(engine, global)) { console.log(engine); return; }
+    console.log(fallback);
     return;
   }
 
   // Priority 4: Fallback
-  console.log(global.default_engine || 'claude');
+  console.log(fallback);
 }
 
 function status() {
@@ -112,21 +133,44 @@ function status() {
   }
 }
 
+function help() {
+  console.log(`MMR (Multi-Model Router) — route AI agents to different backends.
+
+Usage:
+  node router.js resolve <agent-type>   Returns the engine name for an agent
+  node router.js status                 Show routing table and config
+  node router.js --help                 Show this help
+
+Examples:
+  node router.js resolve gsd-phase-researcher    # → gemini
+  node router.js resolve gsd-executor            # → claude
+
+Integration (with graceful fallback):
+  ENGINE=$(node ~/.claude/mmr/router.js resolve <agent-type> 2>/dev/null || echo "claude")
+
+Requires: Node.js 16+`);
+}
+
 // CLI
 const [,, command, ...args] = process.argv;
 
 switch (command) {
   case 'resolve':
     if (!args[0]) {
-      console.error('Usage: node router.js resolve <agent-type> [workflow]');
+      console.error('Usage: node router.js resolve <agent-type>');
       process.exit(1);
     }
-    resolve(args[0], args[1]);
+    resolve(args[0]);
     break;
   case 'status':
     status();
     break;
+  case '--help':
+  case '-h':
+  case 'help':
+    help();
+    break;
   default:
-    console.error('Usage: node router.js <resolve|status> [args]');
+    help();
     process.exit(1);
 }

@@ -1,8 +1,10 @@
 # MMR (Multi-Model Router)
 
-A lightweight routing layer for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) that directs AI agent types to different backends. Research agents go to Gemini (1M context, web search), execution agents stay on Claude (file editing, code execution). 133 lines of Node.js, zero dependencies.
+Route AI agents to different backends from Claude Code. Research agents go to Gemini, execution agents stay on Claude. ~150 lines of Node.js, zero dependencies.
 
-Built for [GSD](https://github.com/cjplanted/get-shit-done) but works with any Claude Code agent workflow.
+Built for [GSD](https://github.com/glittercowboy/get-shit-done) but works with any Claude Code agent workflow.
+
+**Requires:** Node.js 16+
 
 ## Architecture
 
@@ -38,7 +40,7 @@ Built for [GSD](https://github.com/cjplanted/get-shit-done) but works with any C
 | `gsd-phase-researcher` | gemini | 1M context, web search for research |
 | `gsd-project-researcher` | gemini | Deep project research |
 | `gsd-research-synthesizer` | gemini | Synthesize research outputs |
-| `gsd-plan-checker` | gemini | Review plans (read-only) |
+| `gsd-plan-checker` | claude | Plan quality verification |
 | `gsd-planner` | claude | Needs file editing |
 | `gsd-executor` | claude | Needs file editing + bash |
 | `gsd-verifier` | claude | Needs file reading |

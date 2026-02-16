@@ -6,7 +6,7 @@ How GSD's `/gsd:research-phase` workflow uses MMR to route the `gsd-phase-resear
 
 ```bash
 # Resolve which engine to use for the researcher agent
-ENGINE=$(node ~/.claude/mmr/router.js resolve gsd-phase-researcher research-phase 2>/dev/null || echo "claude")
+ENGINE=$(node ~/.claude/mmr/router.js resolve gsd-phase-researcher 2>/dev/null || echo "claude")
 ```
 
 ## Routing Logic

@@ -24,7 +24,7 @@
       "gsd-verifier": "claude",
       "gsd-debugger": "claude",
       "gsd-codebase-mapper": "claude",
-      "gsd-plan-checker": "gemini",
+      "gsd-plan-checker": "claude",
       "gsd-roadmapper": "claude"
     }
   }
